@@ -1,8 +1,17 @@
 name: mario-meets-inspec
-title: InSpec Profile
-maintainer: The Authors
-copyright: The Authors
-copyright_email: you@example.com
+title: Mario Meets InSpec, The Story of a Profile
+maintainer: Victoria Jeffrey, Hannah Maddy
+copyright: Victoria Jeffrey, Hannah Maddy
+copyright_email: vjeffrey@chef.io
 license: All Rights Reserved
-summary: An InSpec Compliance Profile
+summary: Bowser keeps trying to break into my vms! This should help keep him out.
 version: 0.1.0
+depends:
+- name: my-linux-profile
+  git: https://github.com/dev-sec/linux-baseline
+- name: ssh-baseline
+  git: dev-sec/ssh-baseline # from supermarket
+# - name: docker-baseline
+#   path: controls/docker_tests.rb
+supports:
+  - os-name: ubuntu
