@@ -53,3 +53,4 @@ control 'mums the word' do
   end
 end
 
+# Reference: https://github.com/dev-sec/ssh-baseline

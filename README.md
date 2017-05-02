@@ -79,7 +79,7 @@ Make my life easier:
 ## step eleven: inspec wonderfulness; it's like flying on yoshi thru cloudland with 3x starpower
 
 ### docker resource
-`docker run -d -p 4000:80 mariomeetsinspec`
+`docker run -d -p --name 'mariomeetsinspec' 4000:80 mariomeetsinspec`
 `docker ps -a` # get container id
 
 `inspec exec $INSPEC_TESTS_REPO/controls/docker_tests.rb docker://cf96e6af9470`
