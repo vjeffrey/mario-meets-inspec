@@ -10,8 +10,8 @@ depends:
 - name: my-linux-profile
   git: https://github.com/dev-sec/linux-baseline
 - name: ssh-baseline
-  git: dev-sec/ssh-baseline # from supermarket
-# - name: docker-baseline
-#   path: controls/docker_tests.rb
+  url: https://github.com/dev-sec/linux-baseline/archive/tar.gz
 supports:
   - os-name: ubuntu
+
+# Reference: https://github.com/chef/inspec/blob/master/docs/profiles.md

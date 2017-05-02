@@ -1,11 +1,10 @@
-# TODO: MAKE THIS describe.one (or test) better!
+# describe.one test ("the or test"), reference: Alex Pop
+a = command("iptables -L").stdout.scan(/.+/)
 describe.one do
-  describe ConfigurationA do
-  its('setting_1') { should eq true }
-  end
-
-  describe ConfigurationB do
-  its('setting_2') { should eq true }
+  a.each do |entry|
+    describe entry do
+      it { should match(/^Chain INPUT \(policy (DROP|REJECT)\)$/) }
+    end
   end
 end
 
@@ -49,17 +48,12 @@ require_controls 'ssh-baseline' do
 
 end
 
-## Custom resource, reference: https://tech.spaceapegames.com/2016/09/23/custom-inspec-resources/
-
-describe redis_config("leaderboard_service") do
-  it { should exist }
-  its('slave-priority') { should eq('50') }
-  its('rdbcompression') { should eq('yes') }
-  its('dbfilename') { should eq('leaderboard_service.rdb') }
+## Custom resource
+describe mario('why_so_mean') do
+  it { should be_bowser }
 end
 
 ## Ruby in a control, reference: https://github.com/chef/inspec/blob/master/docs/ruby_usage.md
-
 output=command('echo test').stdout
 describe command('echo test') do
   its('stdout') { should eq output }
