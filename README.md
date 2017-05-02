@@ -96,6 +96,7 @@ Hey there big spender!! So you wanna get all fancy devops-like with your complia
   Take a look at the <a href="https://github.com/chef-cookbooks/audit">audit cookbook</a>:
 
 ### Reporting to Chef Automate through Chef Server
+```
 default['audit']['reporter'] = 'chef-server-automate'
 default['audit']['insecure'] = false,
 default['audit']['profiles'] = [
@@ -112,8 +113,10 @@ default['audit']['profiles'] = [
     "supermarket": "hardening/ssh-hardening"
   }
 ]
+```
 
 ### Reporting to Chef Automate Directly
+```
 'audit': {
   'reporter' = 'chef-automate'
   'insecure' = false,  ## true skips ssl cert verification
@@ -128,6 +131,7 @@ default['audit']['profiles'] = [
     }
   ]
 }
+```
 
 ## Bonus Points: Usage with Test Kitchen
 
