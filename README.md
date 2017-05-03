@@ -1,102 +1,153 @@
 # Mario Meets InSpec
 
-Build the VM:
-`cd ~/playground/vagrant-playground/ && vagrant up`
+  TODO: bring vagrant playground stuff into the repo. make dockerfile more lightweight. organize repo so dockerfile is in playground dir, then update following env vars accordingly
 
-Build the Docker Container:
-`docker build -t mariomeetsinspec .`
+Build the VM and Docker Container:
+```
+cd ~/playground/vagrant-playground/ && vagrant up
+docker build -t mariomeetsinspec .
+```
 
 Make my life easier:
-`export VM_KEY_PATH=~/playground/vagrant-playground/.vagrant/machines/default/virtualbox/private_key`
-`export INSPEC_TESTS_REPO=~/presentations/mario-star-infrastructure-inspec/mario-meets-inspec`
+```
+export VM_KEY_PATH=~/playground/vagrant-playground/.vagrant/machines/default/virtualbox/private_key
+export INSPEC_TESTS_REPO=~/presentations/mario-star-infrastructure-inspec/mario-meets-inspec
+```
 
-## step one: spin up a vm to test against
- `cd ~/playground/vagrant-playground && vagrant up`
+## Step One: Get latest InSpec and spin up vm
+```
+gem install inspec
+cd ~/playground/vagrant-playground && vagrant up
+```
 
-## step two: hmm, we should find out more about that vm..
- `inspec detect -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
+## Step Two: Let's find out more about that node...
+```
+inspec detect -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+```
 
-## step three: alright, what was it we wanted to find out? The ssh config protocol? hmm, let's see:
- `inspec shell -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
- `help`
- `help resources`
- `help ssh_config`
- `ssh_config.Protocol`
-  ```
+## Step Three: What do i want to test?? Oh, i can use the InSpec shell to figure it out!
+```
+inspec shell -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+help
+help resources
+help ssh_config
+ssh_config.Protocol
+```
+```ruby
+describe sshd_config do
+  its('Protocol') { should eq '2' }
+end
+```
+
+## Step Four: We've got a test! Now we can copy the test into our ssh_tests.rb file.
+### Oh, but they wanted some information about that test, right? Let's write some comments...
+```ruby
+# impact 1.0
+# title 'check ssh config'
+# ref 'something', url: 'http://something'
+# tag 'safety first!'
+describe sshd_config do
+  its('Protocol') { should eq '2' }
+end
+```
+
+### Hey look, it's a control now!
+```ruby
+control 'ssh-config-check' do
+  impact 1.0
+  title 'Check ssh config protocol'
+  desc 'Protocol should be set to 2. Version 1 = bad monkeys'
+  ref 'that doc that gives an overcomplicated explanation', url: 'http://someone/sounds/fancy'
+  tag 'safety-first-friends'
   describe sshd_config do
     its('Protocol') { should eq '2' }
   end
-  ```
+end
+```
 
-## step four: great, we've got a test. now we can copy the test into our rb file.
-### oh, but they wanted some information about that test, right? let's write some comments
-  ```
-  // impact 1.0
-  // title 'check ssh config'
-  // ref 'something', url: 'http://something'
-  // tag 'safety first!'
-  describe sshd_config do
-    its('Protocol') { should eq '2' }
-  end
-  ```
+## Step Five: From a control to a profile and all about the inspec.yml
+### Stick some controls together in a file, stick it together with an inspec.yml and a profile is made!:
+#### (see controls/ssh_tests.rb and inspec.yml)
+```
+name: mario-meets-inspec
+title: Mario Meets InSpec, The Story of a Profile
+maintainer: Victoria Jeffrey, Hannah Maddy
+copyright: Victoria Jeffrey, Hannah Maddy
+copyright_email: vjeffrey@chef.io
+license: All Rights Reserved
+summary: Bowser keeps trying to break into my vms! This should help keep him out.
+version: 0.1.0
+```
 
-### hey look, it's a control
-  ```
-  control 'ssh-config-check' do
-    impact 1.0
-    title 'Check ssh config protocol'
-    desc 'Protocol should be set to 2. Version 1 = bad monkeys'
-    ref 'that doc that gives an overcomplicated explanation', url: 'http://someone/sounds/fancy'
-    tag 'safety-first-friends'
-    describe sshd_config do
-      its('Protocol') { should eq '2' }
-    end
-  end
-  ```
+## Step Six: Is my profile ok? Are all my tests ok?
+```
+inspec check $INSPEC_TESTS_REPO
+```
 
-## step five: is my profile ok? are all my tests ok?
-`inspec check $INSPEC_TESTS_REPO`
+## Step Seven: Supports; damnit bob stop trying to crib my profiles for your windows! get your own!
+```
+supports:
+  - os-name: ubuntu
+```
 
-## step six: describe.one test
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
+## Step Eight: JSON output FTW!
+```
+inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format json
+```
 
-## step seven: attributes
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml`
+## Step Nine: Attributes
+#### (see controls/my_tests.rb and princess-peach-attribute.yml)
+```
+inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml
+```
 
-## step eight: whoa, there's json output too?
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml --format json`
+## Step Ten: Profile Inheritance; Vendoring a profile
+#### (see controls/my_tests.rb)
+```
+depends:
+- name: my-linux-profile
+  git: https://github.com/dev-sec/linux-baseline
+- name: ssh-baseline
+  url: https://github.com/dev-sec/linux-baseline/archive/tar.gz
+```
+```
+inspec vendor $INSPEC_TESTS_REPO
+inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+```
 
-## step nine: profile inheritance, vendor profile
-`inspec vendor $INSPEC_TESTS_REPO`
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
+## Step Eleven: InSpec Wonderfulness; it's like flying on yoshi thru cloudland...
 
-## step ten: supports; damnit bob stop trying to crib my profiles for your windows! get your own!
-  ```
-  supports:
-    - os-name: ubuntu
-  ```
+### Docker Resource
+#### (see controls/docker_tests.rb)
+```
+docker run -d -p --name 'mariomeetsinspec' 4000:80 mariomeetsinspec
+docker ps -a   (to get container id)
 
-## step eleven: inspec wonderfulness; it's like flying on yoshi thru cloudland with 3x starpower
+inspec exec $INSPEC_TESTS_REPO/controls/docker_tests.rb docker://cf96e6af9470
+```
 
-### docker resource
-`docker run -d -p --name 'mariomeetsinspec' 4000:80 mariomeetsinspec`
-`docker ps -a` # get container id
+### Custom Resource
+#### (see controls/my_tests.rb and libraries/custom_resource.rb)
+```
+inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+```
 
-`inspec exec $INSPEC_TESTS_REPO/controls/docker_tests.rb docker://cf96e6af9470`
+### Ruby Code in a Control
+#### (see controls/my_tests.rb)
+```
+inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+```
 
-### custom resource
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
+## Bonus Points: Usage with Test Kitchen
 
-### ruby code in a control
-`inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10`
-
+TODO: FILL THIS IN
 
 ## Bonus Points: Usage with Audit Cookbook
 Hey there big spender!! So you wanna get all fancy devops-like with your compliance? Let us help you get started!
   Take a look at the <a href="https://github.com/chef-cookbooks/audit">audit cookbook</a>:
 
 ### Reporting to Chef Automate through Chef Server
-```
+```ruby
 default['audit']['reporter'] = 'chef-server-automate'
 default['audit']['insecure'] = false,
 default['audit']['profiles'] = [
@@ -116,7 +167,9 @@ default['audit']['profiles'] = [
 ```
 
 ### Reporting to Chef Automate Directly
-```
+```ruby
+# Set the `data_collector.server_url` and `data_collector.token` in your `client.rb`
+
 'audit': {
   'reporter' = 'chef-automate'
   'insecure' = false,  ## true skips ssl cert verification
@@ -132,10 +185,6 @@ default['audit']['profiles'] = [
   ]
 }
 ```
-
-## Bonus Points: Usage with Test Kitchen
-
-TODO: FILL THIS IN
 
 ## Bonus Points: Usage with Habitat
 
