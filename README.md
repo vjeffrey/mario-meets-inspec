@@ -1,23 +1,18 @@
 # Mario Meets InSpec
 
-  TODO: bring vagrant playground stuff into the repo. make dockerfile more lightweight. organize repo so dockerfile is in playground dir, then update following env vars accordingly
-
 Build the VM and Docker Container:
 ```
-cd ~/playground/vagrant-playground/ && vagrant up
-docker build -t mariomeetsinspec .
+cd playground && vagrant up && docker build -t mariomeetsinspec .
 ```
 
-Make my life easier:
+Set env var for vagrant key:
 ```
-export VM_KEY_PATH=~/playground/vagrant-playground/.vagrant/machines/default/virtualbox/private_key
-export INSPEC_TESTS_REPO=~/presentations/mario-star-infrastructure-inspec/mario-meets-inspec
+export VM_KEY_PATH=./playground/.vagrant/machines/default/virtualbox/private_key
 ```
 
-## Step One: Get latest InSpec and spin up vm
+## Step One: Get latest InSpec
 ```
 gem install inspec
-cd ~/playground/vagrant-playground && vagrant up
 ```
 
 ## Step Two: Let's find out more about that node...
@@ -81,7 +76,7 @@ version: 0.1.0
 
 ## Step Six: Is my profile ok? Are all my tests ok?
 ```
-inspec check $INSPEC_TESTS_REPO
+inspec check profiles/simple-ssh
 ```
 
 ## Step Seven: Supports; damnit bob stop trying to crib my profiles for your windows! get your own!
@@ -92,17 +87,17 @@ supports:
 
 ## Step Eight: JSON output FTW!
 ```
-inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format json
+inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format json
 ```
 
 ## Step Nine: Attributes
-#### (see controls/my_tests.rb and princess-peach-attribute.yml)
+#### (see controls/example_tests.rb and princess-peach-attribute.yml)
 ```
-inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml
+inspec exec profiles/attributes -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml
 ```
 
 ## Step Ten: Profile Inheritance; Vendoring a profile
-#### (see controls/my_tests.rb)
+#### (see controls/example_tests.rb)
 ```
 depends:
 - name: my-linux-profile
@@ -111,8 +106,8 @@ depends:
   url: https://github.com/dev-sec/linux-baseline/archive/tar.gz
 ```
 ```
-inspec vendor $INSPEC_TESTS_REPO
-inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec vendor profiles/inheritance
+inspec exec profiles/inheritance -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
 ## Step Eleven: InSpec Wonderfulness; it's like flying on yoshi thru cloudland...
@@ -120,22 +115,19 @@ inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ### Docker Resource
 #### (see controls/docker_tests.rb)
 ```
-docker run -d -p --name 'mariomeetsinspec' 4000:80 mariomeetsinspec
-docker ps -a   (to get container id)
-
-inspec exec $INSPEC_TESTS_REPO/controls/docker_tests.rb docker://cf96e6af9470
+inspec exec profiles/special-stuff/controls/docker_tests.rb
 ```
 
 ### Custom Resource
-#### (see controls/my_tests.rb and libraries/custom_resource.rb)
+#### (see controls/example_tests.rb and libraries/custom_resource.rb)
 ```
-inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-stuff -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
 ### Ruby Code in a Control
-#### (see controls/my_tests.rb)
+#### (see controls/example_tests.rb)
 ```
-inspec exec $INSPEC_TESTS_REPO -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-stuff -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
 ## Bonus Points: Usage with Test Kitchen
@@ -188,4 +180,5 @@ default['audit']['profiles'] = [
 
 ## Bonus Points: Usage with Habitat
 
-TODO: FILL THIS IN
+<a href="https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/">Blog Post</a>
+<a href="https://www.youtube.com/watch?v=07c-7yJraK0">Video</a>

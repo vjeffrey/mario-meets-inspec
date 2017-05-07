@@ -10,11 +10,4 @@ docker.containers.running?.ids.each do |id|
   end
 end
 
-### Why you trynna ADD on my docker containers!!?
-docker.images.ids.each do |id|
-  describe command("docker history #{id}| grep 'ADD'") do
-    its('stdout') { should eq '' }
-  end
-end
-
 # Reference: https://github.com/chef/inspec/blob/master/docs/resources/docker.md.erb
