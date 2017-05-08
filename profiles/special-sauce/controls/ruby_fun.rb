@@ -1,8 +1,3 @@
-## Custom resource
-describe mario('why_so_mean') do
-  it { should be_bowser }
-end
-
 ## Ruby in a control, reference: https://github.com/chef/inspec/blob/master/docs/ruby_usage.md
 output=command('echo test').stdout
 describe command('echo test') do

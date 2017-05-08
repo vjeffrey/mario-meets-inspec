@@ -1,0 +1,12 @@
+name: mario-meets-inspec
+title: Mario Meets InSpec, The Story of a Profile
+maintainer: Victoria Jeffrey, Hannah Maddy
+copyright: Victoria Jeffrey, Hannah Maddy
+copyright_email: vjeffrey@chef.io
+license: All Rights Reserved
+summary: Bowser keeps trying to break into my vms! This should help keep him out.
+version: 0.1.0
+depends:
+  - name: dev-sec/ssh-baseline  # name-only defaults to supermarket
+  - name: my-linux-profile  # name is optional
+    git: https://github.com/dev-sec/linux-baseline
