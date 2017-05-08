@@ -93,7 +93,7 @@ inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 -
 ## Step Nine: Attributes
 #### (see controls/example_tests.rb and princess-peach-attribute.yml)
 ```
-inspec exec profiles/attributes -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs princess-peach-attribute.yml
+inspec exec profiles/attributes -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs profiles/attributes/princess-peach-attribute.yml
 ```
 
 ## Step Ten: Profile Inheritance; Vendoring a profile
@@ -115,19 +115,19 @@ inspec exec profiles/inheritance -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ### Docker Resource
 #### (see controls/docker_tests.rb)
 ```
-inspec exec profiles/special-stuff/controls/docker_tests.rb
+inspec exec profiles/special-sauce/controls/docker_tests.rb
 ```
 
 ### Custom Resource
 #### (see controls/example_tests.rb and libraries/custom_resource.rb)
 ```
-inspec exec profiles/special-stuff -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/custom-resource -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
 ### Ruby Code in a Control
 #### (see controls/example_tests.rb)
 ```
-inspec exec profiles/special-stuff -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-sauce/controls/ruby_fun.rb -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
 ## Bonus Points: Usage with Test Kitchen
