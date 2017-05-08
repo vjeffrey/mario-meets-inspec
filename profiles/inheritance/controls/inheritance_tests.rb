@@ -1,5 +1,4 @@
 # The include_controls keyword may be used in a profile to import all rules from the named profile.
-# include_controls 'my-postgres-profile'
 
 include_controls 'my-linux-profile' do
 

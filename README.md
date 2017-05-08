@@ -1,32 +1,39 @@
 # Mario Meets InSpec
 
-Build the VM and Docker Container:
+### Well hello there human!
+### So you wanna learn some InSpec, do ya?
+### Sweeeet, let's get a vm and docker container up for testing.
+
+Build the VM and Docker Container by running:
 ```
-cd playground && vagrant up && docker build -t mariomeetsinspec .
+cd playground && vagrant up && docker build -t mariomeetsinspec . && cd ..
 ```
 
-Set env var for vagrant key:
+Set env var for vagrant key so you don't have to typey typey too much:
 ```
 export VM_KEY_PATH=./playground/.vagrant/machines/default/virtualbox/private_key
 ```
 
-## Step One: Get latest InSpec
+## Step One: Get latest InSpec, via gem, cause that's how we roll
+#### You could actually get it via package, chefdk, and chef-client 13+
 ```
 gem install inspec
 ```
 
 ## Step Two: Let's find out more about that node...
+#### Pro tip: You're gonna wanna be at the root of the repo for all these commands, to ensure the vm_key_path is correct
 ```
 inspec detect -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 ```
 
-## Step Three: What do i want to test?? Oh, i can use the InSpec shell to figure it out!
+## Step Three: Hmmmmm, now what do I want to test?? Oh, I can use the InSpec shell to figure it out!
+### What's InSpec shell, you say? It's a pry based REPL (Read–Eval–Print Loop) that can be used to quickly run InSpec controls and tests without having to write it to a file. Its functionality is similar to chef shell.
 ```
 inspec shell -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
 help
 help resources
-help ssh_config
-ssh_config.Protocol
+help sshd_config
+sshd_config.Protocol
 ```
 ```ruby
 describe sshd_config do
@@ -34,7 +41,9 @@ describe sshd_config do
 end
 ```
 
-## Step Four: We've got a test! Now we can copy the test into our ssh_tests.rb file.
+inspec init profile my-first-profile
+
+## Step Four: We've got a test! Now we can copy the test into our my_first_test.rb file.
 ### Oh, but they wanted some information about that test, right? Let's write some comments...
 ```ruby
 # impact 1.0
@@ -61,7 +70,7 @@ end
 ```
 
 ## Step Five: From a control to a profile and all about the inspec.yml
-### Stick some controls together in a file, stick it together with an inspec.yml and a profile is made!:
+### Stick some controls together in a file, together with an inspec.yml and a profile is made!  A what yml?? An InSpec yml! That's a small file that contains metadata information about your profile.
 #### (see controls/ssh_tests.rb and inspec.yml)
 ```
 name: mario-meets-inspec
@@ -74,20 +83,21 @@ summary: Bowser keeps trying to break into my vms! This should help keep him out
 version: 0.1.0
 ```
 
-## Step Six: Is my profile ok? Are all my tests ok?
-```
-inspec check profiles/simple-ssh
-```
-
-## Step Seven: Supports; damnit bob stop trying to crib my profiles for your windows! get your own!
+## Step Six: Supports; damnit Bob stop trying to crib my profiles for your windows! Get your own!
 ```
 supports:
   - os-name: ubuntu
 ```
 
-## Step Eight: JSON output FTW!
+## Step Seven: Is my profile ok? Are all my tests ok? How do I knowwww???
+```
+inspec check profiles/simple-ssh
+```
+
+## Step Eight: JSON output FTW! (and JUNIT too??? whoa man..)
 ```
 inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format json
+inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format junit
 ```
 
 ## Step Nine: Attributes
@@ -98,16 +108,18 @@ inspec exec profiles/attributes -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 -
 
 ## Step Ten: Profile Inheritance; Vendoring a profile
 #### (see controls/example_tests.rb)
+#### Pro tip: --no-create-lockfile skips the lockfile creation
 ```
 depends:
 - name: my-linux-profile
   git: https://github.com/dev-sec/linux-baseline
 - name: ssh-baseline
-  url: https://github.com/dev-sec/linux-baseline/archive/tar.gz
+  url: https://github.com/dev-sec/ssh-baseline/archive/tar.gz
 ```
 ```
 inspec vendor profiles/inheritance
 inspec exec profiles/inheritance -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec archive profiles/inheritance
 ```
 
 ## Step Eleven: InSpec Wonderfulness; it's like flying on yoshi thru cloudland...
@@ -131,8 +143,15 @@ inspec exec profiles/special-sauce/controls/ruby_fun.rb -i $VM_KEY_PATH -t ssh:/
 ```
 
 ## Bonus Points: Usage with Test Kitchen
-
-TODO: FILL THIS IN
+Test-kitchen is a tool used to automatically test cookbook data across any combination of platforms and test suites.
+Well, that sounds nice. I sure would love to do a quick test of my profile against all these different platform versions, but how oh how do I do so?
+TADA: <a href="https://github.com/chef/kitchen-inspec">Kitchen Inspec</a>
+What??? You're gonna InSpec my kitchen?? lol...you know you thought it was funny :)
+kitchen-inspec is a tool you can use with test-kitchen by adding the following to your .kitchen.yml
+```
+verifier:
+  name: inspec
+```
 
 ## Bonus Points: Usage with Audit Cookbook
 Hey there big spender!! So you wanna get all fancy devops-like with your compliance? Let us help you get started!
@@ -180,5 +199,7 @@ default['audit']['profiles'] = [
 
 ## Bonus Points: Usage with Habitat
 
+You can package an InSpec profile with Habitat!
+  Whaaaaat?? Learn more here:
 <a href="https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/">Blog Post</a>
 <a href="https://www.youtube.com/watch?v=07c-7yJraK0">Video</a>
