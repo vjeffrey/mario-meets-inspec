@@ -1,4 +1,5 @@
-# The include_controls keyword may be used in a profile to import all rules from the named profile.
+# The include_controls keyword may be used in a profile
+# to import all rules from the named profile.
 
 include_controls 'my-linux-profile' do
 
@@ -10,7 +11,8 @@ include_controls 'my-linux-profile' do
   end
 end
 
-# The require_controls keyword may be used to load only specific controls from the named profile.
+# The require_controls keyword may be used to
+# load only specific controls from the named profile.
 require_controls 'dev-sec/ssh-baseline' do
 
   control "sshd-05"
