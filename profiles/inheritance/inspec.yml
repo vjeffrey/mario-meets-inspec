@@ -8,5 +8,5 @@ summary: Bowser keeps trying to break into my vms! This should help keep him out
 version: 0.1.0
 depends:
   - name: dev-sec/ssh-baseline  # name-only defaults to supermarket
-  - name: my-linux-profile  # name is optional
+  - name: my-linux-profile  # how you refer to profile in test file
     git: https://github.com/dev-sec/linux-baseline
