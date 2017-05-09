@@ -32,7 +32,9 @@ inspec shell -i $KEY -t ssh://vagrant@192.168.33.10
 help
 help resources
 help sshd_config
+sshd_config.params
 sshd_config.Protocol
+help matchers
 ```
 ```ruby
 describe sshd_config do

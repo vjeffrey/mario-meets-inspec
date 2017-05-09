@@ -13,3 +13,16 @@ describe.one do
     end
   end
 end
+
+# usage with external yaml
+my_services = yaml(content: inspec.profile.file('services.yml')).params
+
+my_services.each do |s|
+  describe service(s['name']) do
+    it { should be_running }
+  end
+
+  describe port(s['port']) do
+    it { should be_listening }
+  end
+end
