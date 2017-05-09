@@ -1,35 +1,34 @@
 # Mario Meets InSpec
 
-### Well hello there human!
-### So you wanna learn some InSpec, do ya?
-### Sweeeet, let's get a vm and docker container up for testing.
+### Well hello there human!  So you wanna learn some InSpec, do ya?
+### Let's get a vm and docker container up for testing.
 
 Build the VM and Docker Container by running:
 ```
-cd playground && vagrant up && docker build -t mariomeetsinspec . && cd ..
+make start
 ```
 
 Set env var for vagrant key so you don't have to typey typey too much:
 ```
-export VM_KEY_PATH=./playground/.vagrant/machines/default/virtualbox/private_key
+export KEY=./playground/.vagrant/machines/default/virtualbox/private_key
 ```
 
 ## Step One: Get latest InSpec, via gem, cause that's how we roll
-#### You could actually get it via package, chefdk, and chef-client 13+
+#### You could actually get it via package, chefdk, and chef-client 13+, too. But this is easiest here and now in our friendly terminal.
 ```
 gem install inspec
 ```
 
 ## Step Two: Let's find out more about that node...
-#### Pro tip: You're gonna wanna be at the root of the repo for all these commands, to ensure the vm_key_path is correct
+#### Pro tip: You're gonna wanna be at the root of the repo for all these commands, to ensure the KEY path is correct
 ```
-inspec detect -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec detect -i $KEY -t ssh://vagrant@192.168.33.10
 ```
 
 ## Step Three: Hmmmmm, now what do I want to test?? Oh, I can use the InSpec shell to figure it out!
-### What's InSpec shell, you say? It's a pry based REPL (Read–Eval–Print Loop) that can be used to quickly run InSpec controls and tests without having to write it to a file. Its functionality is similar to chef shell.
+### What's InSpec shell, you say? It's a pry based Read–Eval–Print Loop that can be used to quickly run InSpec controls and tests without having to write it to a file. Its functionality is similar to chef shell.
 ```
-inspec shell -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec shell -i $KEY -t ssh://vagrant@192.168.33.10
 help
 help resources
 help sshd_config
@@ -41,9 +40,13 @@ describe sshd_config do
 end
 ```
 
-inspec init profile my-first-profile
+## Step Four: We've got a test! Now we can talk about profiles:
 
-## Step Four: We've got a test! Now we can copy the test into our my_first_test.rb file.
+```
+inspec init profile my-first-profile
+```
+
+### We can copy the test into our profile
 ### Oh, but they wanted some information about that test, right? Let's write some comments...
 ```ruby
 # impact 1.0
@@ -70,7 +73,7 @@ end
 ```
 
 ## Step Five: From a control to a profile and all about the inspec.yml
-### Stick some controls together in a file, together with an inspec.yml and a profile is made!  A what yml?? An InSpec yml! That's a small file that contains metadata information about your profile.
+### A what yml?? An InSpec yml! That's a small file that contains metadata information about your profile.
 #### (see controls/ssh_tests.rb and inspec.yml)
 ```
 name: mario-meets-inspec
@@ -84,29 +87,34 @@ version: 0.1.0
 ```
 
 ## Step Six: Supports; damnit Bob stop trying to crib my profiles for your windows! Get your own!
+### Supports is used to specify the os-name, release, family, etc.
+#### https://github.com/chef/inspec/blob/master/docs/profiles.md
 ```
 supports:
   - os-name: ubuntu
 ```
 
 ## Step Seven: Is my profile ok? Are all my tests ok? How do I knowwww???
+### Check is used to ensure your profile is in a good state
 ```
 inspec check profiles/simple-ssh
 ```
 
 ## Step Eight: JSON output FTW! (and JUNIT too??? whoa man..)
 ```
-inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format json
-inspec exec profiles/simple-ssh -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --format junit
+inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format json
+inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format junit
 ```
 
 ## Step Nine: Attributes
+### Attributes may be used in profiles to define secrets, such as user names and passwords, that should not otherwise be stored in plain-text in a cookbook
 #### (see controls/example_tests.rb and princess-peach-attribute.yml)
 ```
-inspec exec profiles/attributes -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10 --attrs profiles/attributes/princess-peach-attribute.yml
+inspec exec profiles/attributes -i $KEY -t ssh://vagrant@192.168.33.10 --attrs profiles/attributes/princess-peach-attribute.yml
 ```
 
 ## Step Ten: Profile Inheritance; Vendoring a profile
+### Give me alllll the profiles, alll the power! Alll of it!!!
 #### (see controls/example_tests.rb)
 #### Pro tip: --no-create-lockfile skips the lockfile creation
 ```
@@ -118,11 +126,12 @@ depends:
 ```
 ```
 inspec vendor profiles/inheritance
-inspec exec profiles/inheritance -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/inheritance -i $KEY -t ssh://vagrant@192.168.33.10
 inspec archive profiles/inheritance
 ```
 
 ## Step Eleven: InSpec Wonderfulness; it's like flying on yoshi thru cloudland...
+### Seriously though, how dope is cloudland???  I love that place. Who doesn't wanna bounce on clouds?
 
 ### Docker Resource
 #### (see controls/docker_tests.rb)
@@ -133,13 +142,13 @@ inspec exec profiles/special-sauce/controls/docker_tests.rb
 ### Custom Resource
 #### (see controls/example_tests.rb and libraries/custom_resource.rb)
 ```
-inspec exec profiles/custom-resource -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/custom-resource -i $KEY -t ssh://vagrant@192.168.33.10
 ```
 
 ### Ruby Code in a Control
 #### (see controls/example_tests.rb)
 ```
-inspec exec profiles/special-sauce/controls/ruby_fun.rb -i $VM_KEY_PATH -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-sauce/controls/ruby_fun.rb -i $KEY -t ssh://vagrant@192.168.33.10
 ```
 
 ## Bonus Points: Usage with Test Kitchen
@@ -202,4 +211,5 @@ default['audit']['profiles'] = [
 You can package an InSpec profile with Habitat!
   Whaaaaat?? Learn more here:
 <a href="https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/">Blog Post</a>
+
 <a href="https://www.youtube.com/watch?v=07c-7yJraK0">Video</a>
