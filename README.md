@@ -17,7 +17,10 @@ export KEY=./playground/.vagrant/machines/default/virtualbox/private_key
 #### You could actually get it via package, chefdk, and chef-client 13+, too. But this is easiest here and now in our friendly terminal.
 ```
 gem install inspec
+inspec help
+inspec version
 ```
+#### Are you on latest InSpec? Check by going to https://rubygems.org/gems/inspec/
 
 ## Step Two: Let's find out more about that node...
 #### Pro tip: You're gonna wanna be at the root of the repo for all these commands, to ensure the KEY path is correct
@@ -27,12 +30,15 @@ inspec detect -i $KEY -t ssh://vagrant@192.168.33.10
 
 ## Step Three: Hmmmmm, now what do I want to test?? Oh, I can use the InSpec shell to figure it out!
 ### What's InSpec shell, you say? It's a pry based Read–Eval–Print Loop that can be used to quickly run InSpec controls and tests without having to write it to a file. Its functionality is similar to chef shell.
+#### We'll start by connecting to the shell with our key and transport information, and then play around in the shell for a bit and write our first test.
 ```
+inspec help shell
 inspec shell -i $KEY -t ssh://vagrant@192.168.33.10
 help
 help resources
 help sshd_config
 sshd_config.params
+sshd_config.port
 sshd_config.Protocol
 help matchers
 ```
@@ -48,7 +54,7 @@ end
 inspec init profile my-first-profile
 ```
 
-### We can copy the test into our profile
+### We can copy the test into our test file (my-first-profile/controls/example.rb)
 ### Oh, but they wanted some information about that test, right? Let's write some comments...
 ```ruby
 # impact 1.0
@@ -63,7 +69,7 @@ end
 ### Hey look, it's a control now!
 ```ruby
 control 'ssh-config-check' do
-  impact 1.0
+  impact 1.0  # how important is this test? (0-0.3 = minor, 0.4-0.7 = major, 0.7-1.0 critical)
   title 'Check ssh config protocol'
   desc 'Protocol should be set to 2. Version 1 = bad monkeys'
   ref 'that doc that gives an overcomplicated explanation', url: 'http://someone/sounds/fancy'
@@ -103,7 +109,9 @@ inspec check profiles/simple-ssh
 ```
 
 ## Step Eight: JSON output FTW! (and JUNIT too??? whoa man..)
+### Running this profile should result in a combination of passes and fails
 ```
+inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10
 inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format json
 inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format junit
 ```
@@ -118,6 +126,7 @@ inspec exec profiles/attributes -i $KEY -t ssh://vagrant@192.168.33.10 --attrs p
 ## Step Ten: Profile Inheritance; Vendoring a profile
 ### Give me alllll the profiles, alll the power! Alll of it!!!
 #### (see controls/example_tests.rb)
+#### Pro tip: --overwrite allows you to overwrite an already-vendored profile
 #### Pro tip: --no-create-lockfile skips the lockfile creation
 ```
 depends:
@@ -127,9 +136,14 @@ depends:
   url: https://github.com/dev-sec/ssh-baseline/archive/tar.gz
 ```
 ```
-inspec vendor profiles/inheritance
+inspec vendor profiles/inheritance  # downloads all the dependencies
 inspec exec profiles/inheritance -i $KEY -t ssh://vagrant@192.168.33.10
-inspec archive profiles/inheritance
+```
+
+### Tarball a profile, because friends share profiles!
+```
+inspec archive profiles/simple-ssh
+ls  # notice the tar file there?
 ```
 
 ## Step Eleven: InSpec Wonderfulness; it's like flying on yoshi thru cloudland...
@@ -211,7 +225,28 @@ default['audit']['profiles'] = [
 ## Bonus Points: Usage with Habitat
 
 You can package an InSpec profile with Habitat!
+  ```
+  inspec habitat help
+  ```
   Whaaaaat?? Learn more here:
 <a href="https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/">Blog Post</a>
 
 <a href="https://www.youtube.com/watch?v=07c-7yJraK0">Video</a>
+
+
+## More Cool Stuff
+
+### Inspec + Supermarket:
+    ```
+    inspec help supermarket
+    inspec supermarket profiles
+    ```
+
+### InSpec + Docker:
+    * https://github.com/dev-sec/cis-docker-benchmark
+    * https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/
+    * https://blog.chef.io/2017/03/22/docker-container-compliance-with-inspec/
+
+### Inspec + AWS:
+    * https://github.com/alexpop/ec2-instance-profile
+    * https://www.inspec.io/docs/reference/profiles/
