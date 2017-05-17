@@ -15,14 +15,18 @@ describe.one do
 end
 
 # usage with external yaml
-my_services = yaml(content: inspec.profile.file('services.yml')).params
+# my_services = yaml(content: inspec.profile.file('services.yml')).params
 
-my_services.each do |s|
-  describe service(s['name']) do
-    it { should be_running }
-  end
+# my_services.each do |s|
+#   describe service(s['name']) do
+#     it { should be_running }
+#   end
 
-  describe port(s['port']) do
-    it { should be_listening }
-  end
-end
+#   describe port(s['port']) do
+#     it { should be_listening }
+#   end
+# end
+
+# need a separate profile for docker stuff and ruby stuff so i can make this work
+# (it doesn't have access to the services yml when running the file directly)
+# will fix
