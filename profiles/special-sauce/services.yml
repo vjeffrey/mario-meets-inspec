@@ -1,4 +1,0 @@
-- service_name: httpd-alpha
-  port: 80
-- service_name: httpd-beta
-  port: 8080

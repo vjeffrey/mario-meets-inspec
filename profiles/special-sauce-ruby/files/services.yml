@@ -1,0 +1,3 @@
+- service_name: ssh
+- service_name: http  # this one should fail
+  port: 8080
