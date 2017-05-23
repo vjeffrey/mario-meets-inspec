@@ -152,7 +152,7 @@ ls  # notice the tar file there?
 ### Docker Resource
 #### (see controls/docker_tests.rb)
 ```
-inspec exec profiles/special-sauce/controls/docker_tests.rb
+inspec exec profiles/docker-love
 ```
 
 ### Custom Resource
@@ -164,7 +164,7 @@ inspec exec profiles/custom-resource -i $KEY -t ssh://vagrant@192.168.33.10
 ### Ruby Code in a Control
 #### (see controls/example_tests.rb)
 ```
-inspec exec profiles/special-sauce/controls/ruby_fun.rb -i $KEY -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-sauce-ruby -i $KEY -t ssh://vagrant@192.168.33.10
 ```
 
 ## Bonus Points: Usage with Test Kitchen
@@ -247,6 +247,9 @@ You can package an InSpec profile with Habitat!
     * https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/
     * https://blog.chef.io/2017/03/22/docker-container-compliance-with-inspec/
 
-### Inspec + AWS:
+### Inspec + Cloud Modules:
+    * https://blog.chef.io/2017/05/23/inspec-launches-support-cloud-platform-assessments/
     * https://github.com/alexpop/ec2-instance-profile
-    * https://www.inspec.io/docs/reference/profiles/
+
+### WannaCry Exploit
+    * https://blog.chef.io/2017/05/15/detecting-wannacry-exploit-inspec/
