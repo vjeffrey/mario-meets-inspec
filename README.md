@@ -253,3 +253,9 @@ You can package an InSpec profile with Habitat!
 
 ### WannaCry Exploit
     * https://blog.chef.io/2017/05/15/detecting-wannacry-exploit-inspec/
+
+------------------------------------
+
+# <a href="https://www.youtube.com/watch?v=wpNINl1qczc&feature=youtu.be">Watch the Presentation!</a>
+
+# <a href="https://goo.gl/forms/R6d5h0oo9x9nYRe93">Give us Feedback!</a>
