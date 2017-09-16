@@ -1,4 +1,4 @@
-playground/.vagrant/*
+playground/*/.vagrant/*
 **/**/*.lock
 profiles/inheritance/vendor/*
 my-first-profile*

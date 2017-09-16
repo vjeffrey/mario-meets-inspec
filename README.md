@@ -3,18 +3,23 @@
 ### Well hello there human!  So you wanna learn some InSpec, do ya?
 ### Let's get a vm and docker container up for testing.
 
-Build the VM and Docker Container by running:
+Build the VMs and Docker containers by running:
 ```
-make start
+make start-vagrant-ubuntu
+make start-vagrant-windows
+make start-docker-ssh
+make start-docker-mario
 ```
 
-Set env var for vagrant key so you don't have to typey typey too much:
+Set env var for keys and passwords so you don't have to typey typey too much:
 ```
-export KEY=./playground/.vagrant/machines/default/virtualbox/private_key
+export VAGRANT_KEY=./playground/vagrant-ubuntu/.vagrant/machines/default/virtualbox/private_key
+export SSH_PASS='password'
+export WINDOWS_PASS='vagrant'
 ```
 
 ## Step One: Get latest InSpec, via gem, cause that's how we roll
-#### You could actually get it via package, chefdk, and chef-client 13+, too. But this is easiest here and now in our friendly terminal.
+#### You could actually get it via package, chefdk, and chef-client 13+, docker image and hab package too. But this is easiest here and now in our friendly terminal.
 ```
 gem install inspec
 inspec help
@@ -25,7 +30,10 @@ inspec version
 ## Step Two: Let's find out more about that node...
 #### Pro tip: You're gonna wanna be at the root of the repo for all these commands, to ensure the KEY path is correct
 ```
-inspec detect -i $KEY -t ssh://vagrant@192.168.33.10
+inspec detect -t winrm://vagrant@127.0.0.1 --password $WINDOWS_PASS -p 55985
+inspec detect -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030
+inspec detect -t ssh://vagrant@192.168.33.10 -i $VAGRANT_KEY
+inspec detect -t docker://cc_pg
 ```
 
 ## Step Three: Hmmmmm, now what do I want to test?? Oh, I can use the InSpec shell to figure it out!
@@ -33,7 +41,7 @@ inspec detect -i $KEY -t ssh://vagrant@192.168.33.10
 #### We'll start by connecting to the shell with our key and transport information, and then play around in the shell for a bit and write our first test.
 ```
 inspec help shell
-inspec shell -i $KEY -t ssh://vagrant@192.168.33.10
+inspec shell -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030
 help
 help resources
 help sshd_config
@@ -111,16 +119,16 @@ inspec check profiles/simple-ssh
 ## Step Eight: JSON output FTW! (and JUNIT too??? whoa man..)
 ### Running this profile should result in a combination of passes and fails
 ```
-inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10
-inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format json
-inspec exec profiles/simple-ssh -i $KEY -t ssh://vagrant@192.168.33.10 --format junit
+inspec exec profiles/simple-ssh -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030
+inspec exec profiles/simple-ssh -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030 --format json
+inspec exec profiles/simple-ssh -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030 --format junit
 ```
 
 ## Step Nine: Attributes
 ### Attributes may be used in profiles to define secrets, such as user names and passwords, that should not otherwise be stored in plain-text in a cookbook
 #### (see controls/example_tests.rb and princess-peach-attribute.yml)
 ```
-inspec exec profiles/attributes -i $KEY -t ssh://vagrant@192.168.33.10 --attrs profiles/attributes/princess-peach-attribute.yml
+inspec exec profiles/attributes --attrs profiles/attributes/princess-peach-attribute.yml
 ```
 
 ## Step Ten: Profile Inheritance; Vendoring a profile
@@ -137,7 +145,7 @@ depends:
 ```
 ```
 inspec vendor profiles/inheritance  # downloads all the dependencies
-inspec exec profiles/inheritance -i $KEY -t ssh://vagrant@192.168.33.10
+inspec exec profiles/inheritance -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030
 ```
 
 ### Tarball a profile, because friends share profiles!
@@ -158,13 +166,13 @@ inspec exec profiles/docker-love
 ### Custom Resource
 #### (see controls/example_tests.rb and libraries/custom_resource.rb)
 ```
-inspec exec profiles/custom-resource -i $KEY -t ssh://vagrant@192.168.33.10
+inspec exec profiles/custom-resource
 ```
 
 ### Ruby Code in a Control
 #### (see controls/example_tests.rb)
 ```
-inspec exec profiles/special-sauce-ruby -i $KEY -t ssh://vagrant@192.168.33.10
+inspec exec profiles/special-sauce-ruby -t ssh://pwsudo@localhost --password $SSH_PASS -p 11030
 ```
 
 ## Bonus Points: Usage with Test Kitchen
@@ -181,26 +189,6 @@ verifier:
 ## Bonus Points: Usage with Audit Cookbook
 Hey there big spender!! So you wanna get all fancy devops-like with your compliance? Let us help you get started!
   Take a look at the <a href="https://github.com/chef-cookbooks/audit">audit cookbook</a>:
-
-### Reporting to Chef Automate through Chef Server
-```ruby
-default['audit']['reporter'] = 'chef-server-automate'
-default['audit']['insecure'] = false,
-default['audit']['profiles'] = [
-  {
-    name: 'cis-ubuntu14.04-level2',
-    compliance: 'workstation-1/cis-ubuntu14.04lts-level2'
-  },
-  {
-    'name': 'my-local-profile',
-    'path': '/some/base_linux.tar.gz'
-  },
-  {
-    "name": "ssh",
-    "supermarket": "hardening/ssh-hardening"
-  }
-]
-```
 
 ### Reporting to Chef Automate Directly
 ```ruby
@@ -222,18 +210,6 @@ default['audit']['profiles'] = [
 }
 ```
 
-## Bonus Points: Usage with Habitat
-
-You can package an InSpec profile with Habitat!
-  ```
-  inspec habitat help
-  ```
-  Whaaaaat?? Learn more here:
-<a href="https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/">Blog Post</a>
-
-<a href="https://www.youtube.com/watch?v=07c-7yJraK0">Video</a>
-
-
 ## More Cool Stuff
 
 ### Inspec + Supermarket:
@@ -242,7 +218,7 @@ You can package an InSpec profile with Habitat!
     inspec supermarket profiles
     ```
 
-### InSpec + Docker:
+### InSpec + Containers:
     * https://github.com/dev-sec/cis-docker-benchmark
     * https://blog.chef.io/2017/03/30/inspec-habitat-and-continuous-compliance/
     * https://blog.chef.io/2017/03/22/docker-container-compliance-with-inspec/
@@ -254,8 +230,10 @@ You can package an InSpec profile with Habitat!
 ### WannaCry Exploit
     * https://blog.chef.io/2017/05/15/detecting-wannacry-exploit-inspec/
 
+
+## But how does it all happen?? How does InSpec connect to these machines? It uses train! Go check it out <a href="https://github.com/chef/train">here</a>!
 ------------------------------------
 
-# <a href="https://www.youtube.com/watch?v=wpNINl1qczc&feature=youtu.be">Watch the Presentation!</a>
+# <a href="https://www.youtube.com/watch?v=wpNINl1qczc&feature=youtu.be">Watch the Presentation @ChefConf 2017!</a>
 
 # <a href="https://goo.gl/forms/R6d5h0oo9x9nYRe93">Give us Feedback!</a>
