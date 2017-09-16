@@ -32,6 +32,7 @@ control 'no-mess-with-hostkey' do
   impact 1.0
   title 'Server: Specify SSH HostKeys'
   desc 'Specify HostKey for protection against Man-In-The-Middle Attacks'
+  tag 'blablablabla and more information'
   describe sshd_config do
     its('HostKey') { should cmp ssh_crypto.valid_hostkeys }
   end
